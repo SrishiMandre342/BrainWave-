@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>⚙️ Round 3: Code Optimization</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      font-family: 'Poppins', sans-serif;
+      background: url("images/cobg.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: #f5f5f5;
+      text-align: center;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom right, rgba(0,0,0,0.7), rgba(10,10,30,0.8));
+      backdrop-filter: blur(2px);
+      z-index: -1;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      color: #00ffcc;
+      text-shadow: 0 0 15px #00ffcc;
+    }
+
+    .note { color: #ddd; font-size: 1rem; margin-bottom: 30px; }
+
+    .question-box {
+      text-align: left;
+      max-width: 900px;
+      max-height: 500px;
+      overflow-y: auto;
+      margin: 40px auto;
+      padding: 25px 30px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(0,255,204,0.2);
+      box-shadow: 0 0 20px rgba(0,255,204,0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .question-box:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 25px rgba(0,255,204,0.4);
+    }
+
+    pre {
+      background: rgba(0,0,0,0.8);
+      padding: 15px;
+      border-radius: 8px;
+      color: #00ff66;
+      font-size: 15px;
+      overflow-x: auto;
+      margin-bottom: 15px;
+      box-shadow: inset 0 0 10px rgba(0,255,153,0.3);
+      white-space: pre-wrap;
+    }
+
+    textarea {
+      width: 100%;
+      height: 250px;
+      margin-top: 10px;
+      background: rgba(0,0,0,0.85);
+      color: #00ff99;
+      border: 1px solid rgba(0,255,153,0.3);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 15px;
+      resize: vertical;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #00ffcc;
+      box-shadow: 0 0 10px #00ffcc;
+    }
+
+    button {
+      margin-top: 18px;
+      padding: 12px 35px;
+      background: linear-gradient(90deg, #00ffcc, #007bff);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s ease;
+      box-shadow: 0 0 10px rgba(0,255,204,0.4);
+    }
+
+    button:hover {
+      box-shadow: 0 0 20px rgba(0,255,204,0.8);
+      transform: translateY(-2px);
+    }
+
+    #volunteer-section {
+      margin-top: 50px;
+      padding: 20px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 12px;
+    }
+
+    #volunteer-section h2 { color:#00ffcc; margin-bottom:15px;}
+    #volunteer-section p { color:#ddd; margin-bottom:15px;}
+    #volunteer-section button { margin: 5px; }
+  </style>
+</head>
+<body>
+<h1>⚙️ Round 3: Code Optimization</h1>
+<p class="note">Optimize each code snippet below and click <strong>Save</strong> after each answer.</p>
+
+<div id="questions-container"></div>
+
+<!-- Volunteer Section -->
+<div id="volunteer-section">
+  <h2>👥 Volunteer Only Section</h2>
+  <p>Mark the team as selected or not selected for next round:</p>
+  <button id="selectedBtn">✅ Selected</button>
+  <button id="notSelectedBtn">❌ Not Selected</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA3n0_IA5j8rof7-zYqTHAgwhuqLQ61xL8",
+  authDomain: "brainwave-337b3.firebaseapp.com",
+  databaseURL: "https://brainwave-337b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "brainwave-337b3",
+  storageBucket: "brainwave-337b3.appspot.com",
+  messagingSenderId: "18955419464",
+  appId: "1:18955419464:web:5fe45bd80e1674703b7d7d"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const teamName = localStorage.getItem("teamName") || "Anonymous";
+
+const questions = [
+  {
+    q: "C Language — Unoptimized Example (Finding Factorials and Sum of Factorials)",
+    code: `#include <stdio.h>
+int factorial(int n) {
+    int fact = 1;
+    int i = 1;
+    while (i <= n) {
+        fact = fact * i;
+        i++;
+    }
+    return fact;
+}
+int main() {
+    int n;
+    printf("Enter a number: ");
+    scanf("%d", &n);
+    int sum = 0;
+    int fact1 = factorial(1); int fact2 = factorial(2); int fact3 = factorial(3);
+    int fact4 = factorial(4); int fact5 = factorial(5); int fact6 = factorial(6);
+    int fact7 = factorial(7); int fact8 = factorial(8); int fact9 = factorial(9);
+    int fact10 = factorial(10);
+    if(n>=1) sum+=fact1; if(n>=2) sum+=fact2; if(n>=3) sum+=fact3;
+    if(n>=4) sum+=fact4; if(n>=5) sum+=fact5; if(n>=6) sum+=fact6;
+    if(n>=7) sum+=fact7; if(n>=8) sum+=fact8; if(n>=9) sum+=fact9;
+    if(n>=10) sum+=fact10;
+    printf("The sum of factorials up to %d is %d\\n", n, sum);
+    return 0;
+}`
+  },
+  {
+    q: "C Language — Unoptimized Example (Addition of Two Numbers)",
+code: `#include <stdio.h>
+
+int main() {
+    int a, b, sum;
+    printf("Enter first number: ");
+    scanf("%d", &a);
+    printf("Enter second number: ");
+    scanf("%d", &b);
+
+    // Performing addition using unnecessary steps
+    int temp1 = a;
+    int temp2 = b;
+    sum = 0;
+
+    for (int i = 0; i < 1; i++) {   // unnecessary loop
+        sum = temp1 + temp2;        // actual addition
+    }
+
+    printf("The sum of %d and %d is %d\\n", a, b, sum);
+    return 0;
+}`
+  },
+  {
+    q: "Java Program 1 — Unoptimized Example (Sum and Average of Array Elements)",
+    code: `import java.util.Scanner;
+public class UnoptimizedArraySum {
+    public static void main(String[] args) {
+        Scanner sc=new Scanner(System.in);
+        System.out.print("Enter 10 numbers: ");
+        int a1=sc.nextInt(); int a2=sc.nextInt(); int a3=sc.nextInt(); int a4=sc.nextInt();
+        int a5=sc.nextInt(); int a6=sc.nextInt(); int a7=sc.nextInt(); int a8=sc.nextInt();
+        int a9=sc.nextInt(); int a10=sc.nextInt();
+        int sum=a1+a2+a3+a4+a5+a6+a7+a8+a9+a10;
+        double avg=sum/10.0;
+        if(a1>avg) System.out.println(a1+" is above average");
+        if(a2>avg) System.out.println(a2+" is above average");
+        if(a3>avg) System.out.println(a3+" is above average");
+        if(a4>avg) System.out.println(a4+" is above average");
+        if(a5>avg) System.out.println(a5+" is above average");
+        if(a6>avg) System.out.println(a6+" is above average");
+        if(a7>avg) System.out.println(a7+" is above average");
+        if(a8>avg) System.out.println(a8+" is above average");
+        if(a9>avg) System.out.println(a9+" is above average");
+        if(a10>avg) System.out.println(a10+" is above average");
+    }
+}`
+  },
+ {
+  q: "Python — Unoptimized Example (Finding Prime Numbers and Their Sum)",
+  code: `# Unoptimized Python program to find all prime numbers up to n and calculate their sum
+
+n = int(input("Enter a number: "))
+primes = []
+total_sum = 0
+
+for i in range(2, n+1):
+    flag = 0
+    for j in range(2, i):
+        if i % j == 0:
+            flag = 1
+            break
+    if flag == 0:
+        primes.append(i)
+
+# Calculating sum of primes (inefficient separate loop)
+for p in primes:
+    total_sum = total_sum + p
+
+# Printing primes (unoptimized separate loop)
+for p in primes:
+    print("Prime number:", p)
+
+print("Total prime numbers found:", len(primes))
+print("Sum of all prime numbers:", total_sum)`
+}
+
+  ,
+  {
+    q: "C Language — Unoptimized Example (Linked List Operations)",
+    code: `#include <stdio.h>
+#include <stdlib.h>
+struct Node {
+    int data;
+    struct Node* next;
+};
+int main() {
+    struct Node* head = NULL;
+    struct Node* second = NULL;
+    struct Node* third = NULL;
+    
+    head = (struct Node*)malloc(sizeof(struct Node));
+    second = (struct Node*)malloc(sizeof(struct Node));
+    third = (struct Node*)malloc(sizeof(struct Node));
+    
+    head->data = 10; head->next = second;
+    second->data = 20; second->next = third;
+    third->data = 30; third->next = NULL;
+    
+    struct Node* current = head;
+    while(current != NULL) {
+        printf("Data: %d\\n", current->data);
+        current = current->next;
+    }
+    
+    // Adding a new node at end (unoptimized)
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = 40; newNode->next = NULL;
+    current = head;
+    while(current->next != NULL) {
+        current = current->next;
+    }
+    current->next = newNode;
+    
+    // Printing all nodes again (inefficient)
+    current = head;
+    while(current != NULL) {
+        printf("Node value: %d\\n", current->data);
+        current = current->next;
+    }
+    
+    return 0;
+}`
+  },
+  {
+   q: "Python — Unoptimized Example (Finding Maximum Number in a List)",
+code: `numbers = []
+n = int(input("Enter number of elements: "))
+for i in range(n):
+    num = int(input("Enter number: "))
+    numbers.append(num)
+
+# Unoptimized: Using manual comparison instead of built-in max()
+max_num = numbers[0]
+for i in range(len(numbers)):
+    for j in range(i+1, len(numbers)):
+        if numbers[j] > max_num:
+            max_num = numbers[j]
+
+print("The maximum number is:", max_num)`
+
+  }
+];
+
+
+const container = document.getElementById("questions-container");
+questions.forEach((item,index)=>{
+    const box=document.createElement("div");
+    box.className="question-box";
+
+    const p=document.createElement("p");
+    p.innerHTML="<strong>"+item.q+"</strong>";
+
+    const pre=document.createElement("pre");
+    pre.textContent=item.code;
+
+    const label=document.createElement("label");
+    label.setAttribute("for","answer"+(index+1));
+    label.innerHTML="<strong>Your Optimized Code:</strong>";
+
+    const textarea=document.createElement("textarea");
+    textarea.id="answer"+(index+1);
+    textarea.placeholder="Write your optimized solution here...";
+
+    const button=document.createElement("button");
+    button.textContent="💾 Save";
+    button.onclick=()=>saveAnswer(index+1);
+
+    box.append(p, pre, label, textarea, button);
+    container.appendChild(box);
+});
+
+function saveAnswer(qNum){
+    const answer=document.getElementById("answer"+qNum).value.trim();
+    if(!answer){ alert("⚠️ Please enter your code before saving!"); return; }
+    db.ref("teams/"+teamName+"/round3/question"+qNum).set({answer, questionNumber:qNum})
+      .then(()=>alert("✅ Answer saved for Q"+qNum))
+      .catch(e=>alert("❌ Error: "+e));
+}
+
+// Volunteer Section Buttons
+const selectedBtn=document.getElementById("selectedBtn");
+const notSelectedBtn=document.getElementById("notSelectedBtn");
+
+selectedBtn.onclick=()=>{
+    db.ref("teams/"+teamName+"/selection").set("selected")
+      .then(()=>window.location.href="waiting4.html")
+      .catch(e=>alert("❌ Error: "+e));
+};
+
+notSelectedBtn.onclick=()=>{
+    db.ref("teams/"+teamName+"/selection").set("not_selected")
+      .then(()=>{
+          alert("✅ Team marked as Not Selected");
+          selectedBtn.disabled=true;
+          selectedBtn.style.opacity=0.5;
+          selectedBtn.style.cursor="not-allowed";
+      })
+      .catch(e=>alert("❌ Error: "+e));
+};
+// ===== TAB SWITCH DETECTION LOGIC =====
+let switchCount = 0;
+
+document.addEventListener("visibilitychange", function() {
+  if (document.hidden) {  // user left tab or minimized
+    switchCount++;
+
+    if (switchCount === 1) {
+      alert("⚠️ Warning! You switched tabs. Do not leave the quiz window again!");
+    } 
+    else if (switchCount === 2) {
+      alert("🚨 Second Warning! If you switch again, you will be disqualified!");
+    } 
+    else if (switchCount >= 3) {
+      alert("❌ You are disqualified for switching tabs multiple times.");
+      // Optional: clear data and redirect
+      localStorage.removeItem("teamName");
+      localStorage.removeItem("quizScore");
+      window.location.href = "disqualified.html"; // create this page with a message
+    }
+  }
+});
+
+</script>
+</body>
+</html>

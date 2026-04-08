@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🟢 Round 1: Programming MCQs</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+body {
+  background: url("images/cobg.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-shadow: 0 0 8px rgba(0,0,0,0.8);
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+}
+.quiz-box {
+  position: relative;
+  z-index: 2;
+  background: rgba(17, 25, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 30px rgba(59,130,246,0.8);
+  padding: 2rem;
+  border-radius: 1rem;
+  max-width: 900px;
+  width: 90%;
+  overflow-y: auto;
+  max-height: 90vh;
+  animation: fadeIn 1s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+pre {
+  background: rgba(255,255,255,0.08);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.btn {
+  background: linear-gradient(90deg, #2563eb, #1e40af);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: transform 0.2s ease, background 0.3s ease;
+  width: 100%;
+}
+.btn:hover { transform: scale(1.05); background: linear-gradient(90deg, #1d4ed8, #1e3a8a); }
+.btn.selected { background: linear-gradient(90deg, #16a34a, #15803d); box-shadow: 0 0 15px #22c55e; }
+.timer { font-size: 1.2rem; font-weight: bold; color: #facc15; margin-bottom: 1rem; text-align: right; }
+h1 { text-align: center; color: #60a5fa; font-weight: 800; font-size: 2rem; margin-bottom: 1rem; }
+.question { white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="overlay"></div>
+<div class="quiz-box">
+<h1>🟢 Round 1: Programming MCQs</h1>
+<p class="mb-4 text-center text-blue-200">Answer the questions. You have <span class="text-yellow-400 font-bold">30 seconds</span> per question.</p>
+<div id="timer" class="timer">⏱️ Time Left: 30s</div>
+<div id="question" class="mb-4 text-lg question"></div>
+<div id="options" class="options mb-4"></div>
+<button id="nextBtn" class="btn" onclick="submitAnswer()">Next</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA3n0_IA5j8rof7-zYqTHAgwhuqLQ61xL8",
+  authDomain: "brainwave-337b3.firebaseapp.com",
+  databaseURL: "https://brainwave-337b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "brainwave-337b3",
+  storageBucket: "brainwave-337b3.appspot.com",
+  messagingSenderId: "18955419464",
+  appId: "1:18955419464:web:5fe45bd80e1674703b7d7d"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+
+const questions = [
+  // 🟢 C Language (20 MCQs)
+  { q: "Q1. Which format specifier is used to print a string in C?\na) %c\nb) %d\nc) %s\nd) %f", ans: "C" },
+  { q: "Q2. Which keyword is used to exit from a loop in C?\na) break\nb) continue\nc) exit\nd) return", ans: "A" },
+  { q: "Q3. What will printf(\"%d\", 5 % 2); print?\na) 0\nb) 1\nc) 2\nd) 5", ans: "B" },
+  { q: "Q4. Which data type has the largest size?\na) int\nb) float\nc) double\nd) char", ans: "C" },
+  { q: "Q5. Which of the following is not a valid C keyword?\na) typedef\nb) struct\nc) class\nd) union", ans: "C" },
+  { q: "Q6. What is the output of printf(\"%c\", 'A' + 1);?\na) A\nb) B\nc) C\nd) 66", ans: "B" },
+  { q: "Q7. Which symbol is used to denote preprocessor directives?\na) $\nb) #\nc) %\nd) @", ans: "B" },
+  { q: "Q8. What is the default value of an uninitialized local variable?\na) 0\nb) Garbage value\nc) NULL\nd) -1", ans: "B" },
+  { q: "Q9. Which operator is used for pointer dereferencing?\na) &\nb) *\nc) ->\nd) .", ans: "B" },
+  { q: "Q10. Which function is used to copy one string to another?\na) strcpy()\nb) strncpy()\nc) memcpy()\nd) strcat()", ans: "A" },
+  { q: "Q11. What will be the output?\n#include <stdio.h>\nint main() {\n    int x = 5;\n    printf(\"%d %d\", x++, ++x);\n    return 0;\n}\na) 5 7\nb) 6 7\nc) Undefined behavior\nd) 5 6", ans: "C" },
+  { q: "Q12. Which of the following correctly represents a pointer to a function returning int?\na) int *f();\nb) int (*f)();\nc) int f();\nd) int f();", ans: "B" },
+  { q: "Q13. What is the output?\nint main() {\n    char str[] = \"abc\";\n    printf(\"%d\", sizeof(str));\n}\na) 2\nb) 3\nc) 4\nd) 5", ans: "C" },
+  { q: "Q14. What is wrong in this declaration?\nint arr[10] = {1,2,3,4,5,6,7,8,9,10,11};\na) Valid\nb) Too many initializers\nc) Index out of bounds\nd) Garbage value", ans: "B" },
+  { q: "Q15. Which of the following is true about static variables in C?\na) They have block scope and dynamic lifetime\nb) They have block scope and static lifetime\nc) They have global scope only\nd) None", ans: "B" },
+  { q: "Q16. What will be the output?\n#include <stdio.h>\nint main() {\n    const int a = 5;\n    int *p = &a;\n    *p = 10;\n    printf(\"%d\", a);\n    return 0;\n}\na) 5\nb) 10\nc) Compilation Error\nd) Undefined behavior", ans: "D" },
+  { q: "Q17. Which memory allocation function initializes allocated memory to zero?\na) malloc()\nb) calloc()\nc) realloc()\nd) free()", ans: "B" },
+  { q: "Q18. What is output?\nint main() {\n    char *ptr = \"Hello\";\n    printf(\"%c\", *++ptr);\n}\na) H\nb) e\nc) l\nd) o", ans: "B" },
+  { q: "Q19. Which of the following is not true for recursion in C?\na) Every recursive call uses stack memory\nb) Infinite recursion may cause stack overflow\nc) Recursive functions can always be replaced by iteration\nd) Recursive functions are always faster than iteration", ans: "D" },
+  { q: "Q20. Which of the following is correct about extern keyword?\na) Declares variable with global lifetime but no storage\nb) Allocates memory for a variable\nc) Creates a static variable\nd) Used only for constants", ans: "A" },
+
+  // 🟠 Python (15 MCQs)
+  { q: "Q21. Which of these is immutable in Python?\na) list\nb) set\nc) dict\nd) tuple", ans: "D" },
+  { q: "Q22. What is the output?\nprint(type(5/2))\na) <class 'int'>\nb) <class 'float'>\nc) <class 'double'>\nd) Error", ans: "B" },
+  { q: "Q23. Which of these creates an empty set?\na) {}\nb) set()\nc) []\nd) None", ans: "B" },
+  { q: "Q24. Which operator is used for floor division?\na) /\nb) //\nc) %\nd) **", ans: "B" },
+  { q: "Q25. What is output?\nx = \"Hello\"\nprint(x[1])\na) H\nb) e\nc) l\nd) o", ans: "B" },
+  { q: "Q26. What is output?\nx = [1, 2, 3]\ny = x\ny.append(4)\nprint(x)\na) [1,2,3]\nb) [1,2,3,4]\nc) Error\nd) None", ans: "B" },
+  { q: "Q27. Which of the following is true about Python functions?\na) They can return multiple values\nb) They can be nested\nc) They are first-class objects\nd) All of the above", ans: "D" },
+  { q: "Q28. What will this code output?\ndef f(a, b=[]):\n    b.append(a)\n    return b\nprint(f(1))\nprint(f(2))\na) [1], [2]\nb) [1], [1,2]\nc) [1,2], [1,2]\nd) Error", ans: "B" },
+  { q: "Q29. Which function is used to get iterator object from iterable?\na) iter()\nb) next()\nc) enumerate()\nd) generator()", ans: "A" },
+  { q: "Q30. What is output?\nprint(bool(\"False\"))\na) False\nb) True\nc) Error\nd) None", ans: "B" },
+  { q: "Q31. Which of these will raise an error?\na) {1,2,3}\nb) {1: \"a\", 2: \"b\"}\nc) {[1,2]: \"a\"}\nd) set([1,2,3])", ans: "C" },
+  { q: "Q32. Which of the following statements about generators is false?\na) They use yield\nb) They are memory efficient\nc) They return entire list at once\nd) They support iteration", ans: "C" },
+  { q: "Q33. What is output?\nprint(2 < 3 < 4)\na) True\nb) False\nc) Error\nd) None", ans: "A" },
+  { q: "Q34. Which of the following is not a Python built-in function?\na) map()\nb) filter()\nc) reduce()\nd) zip()", ans: "C" },
+  { q: "Q35. What is output?\nx = (i*i for i in range(3))\nprint(sum(x))\na) 5\nb) 14\nc) 9\nd) 0", ans: "A" },
+
+  // 🔵 Java (15 MCQs)
+  { q: "Q36. Which of these is not a Java primitive type?\na) int\nb) char\nc) string\nd) boolean", ans: "C" },
+  { q: "Q37. Which keyword is used to inherit a class?\na) super\nb) implements\nc) extends\nd) inherit", ans: "C" },
+  { q: "Q38. Which method is entry point of Java program?\na) start()\nb) main()\nc) run()\nd) execute()", ans: "B" },
+  { q: "Q39. Which of the following is true about constructors in Java?\na) They have no return type\nb) They must have same name as class\nc) They can be overloaded\nd) All of the above", ans: "D" },
+  { q: "Q40. Which package is imported by default in every Java program?\na) java.util\nb) java.lang\nc) java.io\nd) java.net", ans: "B" },
+  { q: "Q41. What will this print?\nString s1 = \"Hello\";\nString s2 = new String(\"Hello\");\nSystem.out.println(s1 == s2);\na) true\nb) false\nc) Hello\nd) Error", ans: "B" },
+  { q: "Q42. Which of the following is not true for Java interfaces?\na) They can contain only abstract methods (before Java 8)\nb) They support multiple inheritance\nc) They can have constructors\nd) A class can implement multiple interfaces", ans: "C" },
+  { q: "Q43. Which exception is checked in Java?\na) NullPointerException\nb) IOException\nc) ArithmeticException\nd) ArrayIndexOutOfBoundsException", ans: "B" },
+  { q: "Q44. What will be the output?\nclass Test {\n    public static void main(String args[]) {\n        System.out.println(10 + 20 + \"Hello\");\n        System.out.println(\"Hello\" + 10 + 20);\n    }\n}\na) 30Hello Hello30\nb) 30Hello Hello1020\nc) Hello30 30Hello\nd) Error", ans: "B" },
+  { q: "Q45. Which of these allows thread-safe operations?\na) ArrayList\nb) LinkedList\nc) Vector\nd) HashMap", ans: "C" },
+  { q: "Q46. Which of the following is true about final keyword?\na) Final variable cannot be reassigned\nb) Final class cannot be inherited\nc) Final method cannot be overridden\nd) All of the above", ans: "D" },
+  { q: "Q47. What is output?\nclass Parent {\n    void show() { System.out.println(\"Parent\"); }\n}\nclass Child extends Parent {\n    void show() { System.out.println(\"Child\"); }\n}\npublic class Test {\n    public static void main(String args[]) {\n        Parent p = new Child();\n        p.show();\n    }\n}\na) Parent\nb) Child\nc) Error\nd) Runtime Exception", ans: "B" },
+  { q: "Q48. Which collection allows duplicate elements in Java?\na) HashSet\nb) TreeSet\nc) ArrayList\nd) None", ans: "C" },
+  { q: "Q49. Which statement is true about Java garbage collection?\na) It can be forced explicitly\nb) finalize() is always called before GC\nc) It reclaims memory for unreachable objects\nd) None", ans: "C" },
+  { q: "Q50. Which is not a feature of Java?\na) Platform independence\nb) Multiple inheritance through classes\nc) Automatic memory management\nd) Object-oriented", ans: "B" }
+];
+
+
+let current=0, score=0, selectedAnswer=null, timer, timeLeft=30;
+
+function startTimer(){
+  timeLeft=30;
+  document.getElementById("timer").textContent=`⏱️ Time Left: ${timeLeft}s`;
+  timer=setInterval(()=>{
+    timeLeft--;
+    document.getElementById("timer").textContent=`⏱️ Time Left: ${timeLeft}s`;
+    if(timeLeft<=0){ clearInterval(timer); submitAnswer(); }
+  },1000);
+}
+
+function showQuestion(){
+  if(current<questions.length){
+    selectedAnswer=null;
+    const q=questions[current];
+    document.getElementById("question").innerText=q.q;
+    const optionsDiv=document.getElementById("options");
+    optionsDiv.innerHTML="";
+    ["A","B","C","D"].forEach(opt=>{
+      const btn=document.createElement("button");
+      btn.className="btn";
+      btn.innerText=opt;
+      btn.onclick=()=>{
+        selectedAnswer=opt;
+        Array.from(optionsDiv.children).forEach(b=>b.classList.remove("selected"));
+        btn.classList.add("selected");
+      };
+      optionsDiv.appendChild(btn);
+    });
+    startTimer();
+  } else { submitQuiz(); }
+}
+
+function submitAnswer(){
+  clearInterval(timer);
+  if(selectedAnswer===questions[current]?.ans) score++;
+  current++;
+  showQuestion();
+}
+
+function submitQuiz() {
+  const teamName = localStorage.getItem("teamName") || "Anonymous";
+  const round = 1;
+
+  // ✅ Push new record instead of overwriting
+  db.ref("leaderboard1").push({
+    name: teamName,
+    score: score,
+    round: round,
+    timestamp: Date.now()
+  }).then(() => {
+    localStorage.setItem("quizScore", score);
+    alert(`🎯 Round 1 complete! Your score: ${score}/50`);
+    window.location.href = "waiting2.html";
+  }).catch(error => {
+    console.error("Error saving score:", error);
+    alert("⚠️ Error saving your score. Please check your connection.");
+  });
+}
+
+
+
+showQuestion();
+// ===== TAB SWITCH DETECTION LOGIC =====
+let switchCount = 0;
+
+document.addEventListener("visibilitychange", function() {
+  if (document.hidden) {  // user left tab or minimized
+    switchCount++;
+
+    if (switchCount === 1) {
+      alert("⚠️ Warning! You switched tabs. Do not leave the quiz window again!");
+    } 
+    else if (switchCount === 2) {
+      alert("🚨 Second Warning! If you switch again, you will be disqualified!");
+    } 
+    else if (switchCount >= 3) {
+      alert("❌ You are disqualified for switching tabs multiple times.");
+      // Optional: clear data and redirect
+      localStorage.removeItem("teamName");
+      localStorage.removeItem("quizScore");
+      window.location.href = "disqualified.html"; // create this page with a message
+    }
+  }
+});
+
+</script>
+</body>
+</html>

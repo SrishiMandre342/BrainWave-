@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Brain Wave</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans">
+  <header class="text-center py-6 bg-purple-700">
+    <h1 class="text-3xl font-bold">🧠 Welcome, <span id="teamNameDisplay"></span></h1>
+    <p class="mt-2 text-lg">Your current round is: <span id="currentRound"></span></p>
+  </header>
+
+  <main class="p-6 text-center">
+    <button id="startRound" class="bg-yellow-500 px-6 py-2 rounded hover:bg-yellow-600">🚀 Start Round</button>
+    <button onclick="logout()" class="mt-4 bg-red-600 px-4 py-2 rounded hover:bg-red-700">Logout</button>
+  </main>
+
+  <script>
+    const teamName = localStorage.getItem("teamName") || "Team";
+    const round = localStorage.getItem("round") || "1";
+    const roundNames = {
+      "1": "🧪 Quiz",
+      "2": "🐞 Debugging",
+      "3": "⚙️ Optimization",
+      "4": "💻 Final Challenge"
+    };
+
+    document.getElementById("teamNameDisplay").textContent = teamName;
+    document.getElementById("currentRound").textContent = roundNames[round];
+
+    document.getElementById("startRound").addEventListener("click", () => {
+      if (round === "1") {
+        window.location.href = "round1-quiz.html";
+      } else if (round === "2") {
+        window.location.href = "round2-debug.html";
+      } else if (round === "3") {
+        window.location.href = "round3-optimize.html";
+      } else if (round === "4") {
+        window.location.href = "round4-final.html";
+      } else {
+        alert("⏳ Next round is not unlocked yet.");
+      }
+    });
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚙️ 3rd Round: Optimization | Brain Wave</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <style>
+    body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('images/cobg.jpg') no-repeat center center fixed; /* your image */
+  background-size: cover;
+}
+
+    /* 🔹 Background Video */
+    .bg-video {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: auto;
+  min-width: 100%;
+  min-height: 100%;
+  transform: translate(-50%, -50%) scale(0.1); /* <-- zoom out slightly */
+  object-fit: cover; /* keep cover to fill screen */
+  z-index: -1;
+}
+
+    /* 🔹 Glowing Center Box */
+    .content-box {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 2.5rem 3rem;
+      box-shadow: 0 0 30px rgba(0, 255, 128, 0.3);
+      text-align: center;
+      max-width: 480px;
+      animation: fadeIn 1.5s ease-in-out;
+      border: 1px solid rgba(0, 255, 128, 0.3);
+    }
+
+    /* Smooth fade animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Neon text glow effects */
+    .neon-green {
+      color: #39ff14;
+      text-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14;
+    }
+
+    .neon-blue {
+      color: #00eaff;
+      text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff;
+    }
+
+    .neon-yellow {
+      color: #faff00;
+      text-shadow: 0 0 8px #faff00;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center h-screen text-white relative overflow-hidden">
+
+  <!-- 🎥 Background Video -->
+  <video autoplay muted loop playsinline class="video-bg">
+    <source src="images/bg.mp4" type="video/mp4" />
+  </video>
+
+  <!-- 🧠 Center Content -->
+  <div class="content-box">
+    <h1 class="text-3xl font-bold mb-3 neon-green">⚙️ 3rd Round: Optimization</h1>
+    <h2 class="text-xl mb-4 neon-blue">
+      Welcome, <span id="teamNameDisplay"></span>!
+    </h2>
+
+    <p class="text-md text-gray-200 mb-5">
+      🚀 This round challenges you to improve code performance.  
+      You'll optimize logic, reduce complexity, and make your solutions faster and cleaner.
+    </p>
+
+    <p class="text-yellow-300 font-semibold neon-yellow mb-3">
+      ⚠️ Only selected teams will move to the next round.<br>
+      Please wait for the admin to unlock it.
+    </p>
+
+    <p class="text-sm text-gray-300 mt-2">
+      🧠 Stay ready — your optimization skills are about to be tested!
+    </p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // 🧾 Display team name
+    document.getElementById("teamNameDisplay").textContent =
+      localStorage.getItem("teamName") || "Team";
+
+    // 🔥 Firebase config (unchanged)
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3n0_IA5j8rof7-zYqTHAgwhuqLQ61xL8",
+      authDomain: "brainwave-337b3.firebaseapp.com",
+      databaseURL: "https://brainwave-337b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "brainwave-337b3",
+      storageBucket: "brainwave-337b3.appspot.com",
+      messagingSenderId: "18955419464",
+      appId: "1:18955419464:web:5fe45bd80e1674703b7d7d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 🔓 Listen for round unlock (logic unchanged)
+    db.ref("rounds").on("value", snapshot => {
+      const rounds = snapshot.val();
+      if (!rounds) return;
+
+      if (rounds.round3?.status === "open") {
+        localStorage.setItem("round", "3");
+        window.location.href = "round3-optimize.html";
+      }
+    });
+  </script>
+</body>
+</html>

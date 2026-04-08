@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Round 1: Logic Puzzles</title>
+</head>
+<body style="background-color:#111; color:white; font-family:sans-serif; text-align:center; padding:50px;">
+
+  <!-- Hidden quiz container -->
+  <div id="quizContainer" style="display: none;">
+    <h1>🧩 Round 1: Logic Puzzles</h1>
+    <p>Solve the following logic problems:</p>
+    <div style="text-align:left; max-width:600px; margin:20px auto;">
+      <p><strong>Q1:</strong> What comes next in the sequence?<br><code>2, 4, 8, 16, ?</code></p>
+      <p><strong>Q2:</strong> Which number is the odd one out?<br><code>3, 5, 7, 9, 11</code></p>
+    </div>
+    <button onclick="submitLogic()" style="margin-top:20px; padding:10px 20px; background-color:#4CAF50; color:white; border:none; border-radius:5px;">Submit</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3n0_IA5j8rof7-zYqTHAgwhuqLQ61xL8",
+      authDomain: "brainwave-337b3.firebaseapp.com",
+      databaseURL: "https://brainwave-337b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "brainwave-337b3",
+      storageBucket: "brainwave-337b3.appspot.com",
+      messagingSenderId: "18955419464",
+      appId: "1:18955419464:web:5fe45bd80e1674703b7d7d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    console.log("Firebase initialized. Checking round status...");
+
+    db.ref("rounds/round1").on("value", snapshot => {
+      const status = snapshot.val()?.status;
+      console.log("Round 1 status:", status);
+
+      if (status === "open") {
+        const quiz = document.getElementById("quizContainer");
+        quiz.style.display = "block";
+        console.log("Quiz container should now be visible.");
+      } else {
+        console.log("Round is locked. Redirecting...");
+        window.location.href = "waiting.html";
+      }
+    }, error => {
+      console.error("Error reading round status:", error);
+      alert("Unable to connect to server. Please try again.");
+    });
+
+    function submitLogic() {
+      const teamName = localStorage.getItem("teamName") || "Anonymous";
+      const score = 2;
+      const round = 1;
+
+      db.ref("teams/" + teamName).set({
+        name: teamName,
+        score: score,
+        round: round
+      });
+
+      localStorage.setItem("quizScore", score);
+      localStorage.setItem("roundCompleted", round);
+      window.location.href = "waiting2.html";
+    }
+  </script>
+</body>
+</html>

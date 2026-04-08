@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | Brain Wave</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans">
+  <!-- Header -->
+  <header class="text-center py-6 bg-purple-700 shadow-lg">
+    <h1 class="text-3xl font-bold">🛠️ Admin Panel</h1>
+    <p class="mt-2 text-lg">Control rounds & view leaderboard</p>
+  </header>
+
+  <main class="p-6 max-w-5xl mx-auto space-y-10">
+    <!-- Round Controls -->
+    <div class="bg-gray-800 p-6 rounded shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">Manage Rounds</h2>
+      <div class="space-y-4">
+        <div>
+          <button onclick="setRound('round1','open')" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">Unlock Round 1</button>
+          <button onclick="setRound('round1','locked')" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Lock Round 1</button>
+        </div>
+        <div>
+          <button onclick="setRound('round2','open')" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">Unlock Round 2</button>
+          <button onclick="setRound('round2','locked')" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Lock Round 2</button>
+        </div>
+        <div>
+          <button onclick="setRound('round3','open')" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">Unlock Round 3</button>
+          <button onclick="setRound('round3','locked')" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Lock Round 3</button>
+        </div>
+        <div>
+          <button onclick="setRound('round4','open')" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">Unlock Round 4</button>
+          <button onclick="setRound('round4','locked')" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Lock Round 4</button>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <button onclick="resetLeaderboard()" class="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700">⚠️ Reset Leaderboard</button>
+      </div>
+    </div>
+
+    <!-- Round 1 Leaderboard -->
+    <div class="bg-gray-800 p-6 rounded shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">📊 Round 1 Leaderboard</h2>
+      <table class="w-full text-left bg-gray-700 rounded overflow-hidden shadow">
+        <thead>
+          <tr class="bg-purple-600">
+            <th class="p-3">Rank</th>
+            <th class="p-3">Team Name</th>
+            <th class="p-3">Score</th>
+            <th class="p-3">Time</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard1"></tbody>
+      </table>
+    </div>
+
+    <!-- Round 2 Leaderboard -->
+    <div class="bg-gray-800 p-6 rounded shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">📊 Round 2 Leaderboard</h2>
+      <table class="w-full text-left bg-gray-700 rounded overflow-hidden shadow">
+        <thead>
+          <tr class="bg-purple-600">
+            <th class="p-3">Rank</th>
+            <th class="p-3">Team Name</th>
+            <th class="p-3">Score</th>
+            <th class="p-3">Time</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard2"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3n0_IA5j8rof7-zYqTHAgwhuqLQ61xL8",
+      authDomain: "brainwave-337b3.firebaseapp.com",
+      databaseURL: "https://brainwave-337b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "brainwave-337b3",
+      storageBucket: "brainwave-337b3.appspot.com",
+      messagingSenderId: "18955419464",
+      appId: "1:18955419464:web:5fe45bd80e1674703b7d7d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const lb1 = document.getElementById("leaderboard1");
+    const lb2 = document.getElementById("leaderboard2");
+
+    function setRound(round, status) {
+      db.ref("rounds/" + round).set({ status });
+      alert(`${round.toUpperCase()} is now ${status.toUpperCase()}!`);
+    }
+
+    function resetLeaderboard() {
+      if (confirm("⚠️ Reset all leaderboard data?")) {
+        db.ref("leaderboard1").set({});
+        db.ref("leaderboard2").set({});
+        lb1.innerHTML = "";
+        lb2.innerHTML = "";
+        alert("✅ Leaderboards reset!");
+      }
+    }
+
+    // ✅ Helper function to render leaderboard
+    function renderLeaderboard(snap, tbody) {
+      const teams = [];
+      snap.forEach(childSnap => {
+        const data = childSnap.val();
+        data.key = childSnap.key; // optional
+        teams.push(data);
+      });
+
+      // Sort by score descending, then timestamp ascending
+      teams.sort((a, b) => b.score - a.score || a.timestamp - b.timestamp);
+
+      tbody.innerHTML = "";
+      teams.forEach((t, i) => {
+        const time = new Date(t.timestamp).toLocaleString();
+        tbody.innerHTML += `
+          <tr>
+            <td class="p-3">${i+1}</td>
+            <td class="p-3">${t.name}</td>
+            <td class="p-3">${t.score}</td>
+            <td class="p-3">${time}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // ✅ Round 1 live leaderboard
+    db.ref("leaderboard1").on("value", snap => {
+      console.log("Leaderboard1 entries:", snap.numChildren());
+      renderLeaderboard(snap, lb1);
+    });
+
+    // ✅ Round 2 live leaderboard
+    db.ref("leaderboard2").on("value", snap => {
+      console.log("Leaderboard2 entries:", snap.numChildren());
+      renderLeaderboard(snap, lb2);
+    });
+  </script>
+</body>
+</html>

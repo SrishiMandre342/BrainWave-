@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🟡 Round 2: Debugging</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: url("images/cobg.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-shadow: 0 0 8px rgba(0,0,0,0.8);
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+    }
+    .quiz-box {
+      position: relative;
+      z-index: 2;
+      background: rgba(17, 25, 40, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 30px #1565fa;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 900px;
+      width: 90%;
+      overflow-y: auto;
+      max-height: 90vh;
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    pre {
+      background: rgba(255,255,255,0.08);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      font-family: "Courier New", monospace;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .btn {
+      background: linear-gradient(90deg, #1565fa, #1565fa);
+      color: black;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: transform 0.2s ease, background 0.3s ease;
+      width: 100%;
+      font-weight: 600;
+      text-align: left;
+    }
+    .btn:hover { transform: scale(1.05); }
+    .btn.selected { background: linear-gradient(90deg, #22c55e, #16a34a); box-shadow: 0 0 15px #22c55e; color: white; }
+    .timer { font-size: 1.2rem; font-weight: bold; color: #1565fa; margin-bottom: 1rem; text-align: right; }
+    h1 { text-align: center; color: #4787fd; font-weight: 800; font-size: 2rem; margin-bottom: 1rem; }
+    .question { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <div class="quiz-box">
+    <h1>🟡 Round 2: Debugging Challenge</h1>
+    <p class="mb-4 text-center text-yellow-200">Fix the bugs in the following code snippets. You have <span class="text-yellow-400 font-bold">90 seconds</span> per question.</p>
+    <div id="timer" class="timer">⏱ Time Left: 90s</div>
+    <div id="question" class="mb-4 text-lg question"></div>
+    <div id="options" class="options mb-4"></div>
+    <button id="nextBtn" class="btn" onclick="submitAnswer()">Next</button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3n0_IA5j8rof7-zYqTHAgwhuqLQ61xL8",
+      authDomain: "brainwave-337b3.firebaseapp.com",
+      databaseURL: "https://brainwave-337b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "brainwave-337b3",
+      storageBucket: "brainwave-337b3.appspot.com",
+      messagingSenderId: "18955419464",
+      appId: "1:18955419464:web:5fe45bd80e1674703b7d7d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+   const questions = [
+  {
+    q: `Q1. 
+#include <stdio.h>
+int main() {
+   int a = 5, b = 2;
+   float c = a / b;
+   printf("%.2f", c);
+   return 0;
+}`,
+    options: [
+      "A) 2.50",
+      "B) 2.00",
+      "C) 2.5",
+      "D) Error"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q2. 
+def greet(name):
+ print("Hello", name)
+greet("Alice")`,
+    options: [
+      "A) Missing parentheses",
+      "B) Wrong function call",
+      "C) Indentation error",
+      "D) Missing return"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q3.
+public class Main {
+ public static void main(String[] args) {
+   int x = 10;
+   if(x = 5)
+     System.out.println("Five");
+ }
+}`,
+    options: [
+      "A) Logical error",
+      "B) Syntax error in if statement",
+      "C) Missing semicolon",
+      "D) None"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q4. 
+numbers = [1, 2, 3, 4, 5]
+print(numbers[5])`,
+    options: [
+      "A) 5",
+      "B) 4",
+      "C) IndexError",
+      "D) None"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q5. (C)
+#include <stdio.h>
+int main() {
+   int x;
+   printf("%d", x);
+   return 0;
+}`,
+    options: [
+      "A) Prints 0",
+      "B) Prints garbage value",
+      "C) Error",
+      "D) Prints NULL"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q6. (Java)
+public class Test {
+ public static void main(String args[]) {
+   int arr[] = {1,2,3};
+   System.out.println(arr[3]);
+ }
+}`,
+    options: [
+      "A) 3",
+      "B) 0",
+      "C) ArrayIndexOutOfBoundsException",
+      "D) 2"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q7. (Python)
+for i in range(1, 5):
+   print(i)
+print(i)`,
+    options: [
+      "A) 1 2 3 4 then 4",
+      "B) 1 2 3 4 then 5",
+      "C) Error: i not defined",
+      "D) Infinite loop"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q8. (C)
+#include <stdio.h>
+int main() {
+   int a = 10;
+   if(a > 5);
+       printf("Hello");
+}`,
+    options: [
+      "A) Hello",
+      "B) No output",
+      "C) Error",
+      "D) Depends"
+    ],
+    ans: "A"
+  },
+  {
+    q: `Q9. (Java)
+public class Example {
+ public static void main(String[] args) {
+   String s = null;
+   System.out.println(s.length());
+ }
+}`,
+    options: [
+      "A) 0",
+      "B) null",
+      "C) NullPointerException",
+      "D) Compilation error"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q10. (Python)
+x = "10"
+y = 5
+print(x + y)`,
+    options: [
+      "A) 15",
+      "B) 105",
+      "C) TypeError",
+      "D) '10 5'"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q11. (C)
+#include <stdio.h>
+int main() {
+   for(int i = 0; i < 3; i++);
+   {
+       printf("Hi");
+   }
+}`,
+    options: [
+      "A) 3 times",
+      "B) Infinite",
+      "C) Once",
+      "D) None"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q12. (Java)
+public class Main {
+ static void printNumber(int n){
+   if(n==0)
+     return;
+   System.out.print(n);
+   printNumber(n--);
+ }
+ public static void main(String[] args){
+   printNumber(3);
+ }
+}`,
+    options: [
+      "A) Prints 321",
+      "B) Infinite recursion",
+      "C) StackOverflowError",
+      "D) Compilation error"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q13. (Python)
+def add(a, b=[]):
+   b.append(a)
+   return b
+print(add(1))
+print(add(2))`,
+    options: [
+      "A) [1] and [2]",
+      "B) [1] and [1,2]",
+      "C) Error",
+      "D) [1,2] and [1,2,3]"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q14. (C)
+#include <stdio.h>
+int main() {
+   char *str = "Hello";
+   str[0] = 'M';
+   printf("%s", str);
+}`,
+    options: [
+      "A) Mello",
+      "B) Hello",
+      "C) Segmentation fault",
+      "D) Compilation error"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q15. (Java)
+public class Main {
+ public static void main(String[] args) {
+   int x = 5;
+   switch(x) {
+     case 1: System.out.println("One");
+     default: System.out.println("Default");
+     case 5: System.out.println("Five");
+   }
+ }
+}`,
+    options: [
+      "A) Default",
+      "B) Five",
+      "C) Default Five",
+      "D) Compilation error"
+    ],
+    ans: "C"
+  },
+  {
+    q: `Q16. (Python)
+x = [1, 2, 3]
+y = x
+y.append(4)
+print(x)`,
+    options: [
+      "A) [1, 2, 3]",
+      "B) [1, 2, 3, 4]",
+      "C) Error",
+      "D) None"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q17. (C)
+#include <stdio.h>
+int main() {
+   int i = 5;
+   printf("%d %d %d", i, i++, ++i);
+}`,
+    options: [
+      "A) 5 5 7",
+      "B) Undefined behavior",
+      "C) 5 6 7",
+      "D) 7 7 7"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q18. (Python)
+def mystery(a, b):
+   return a if a > b else b if b > a else "Equal"
+print(mystery(3, 3))`,
+    options: [
+      "A) 3",
+      "B) Equal",
+      "C) Error",
+      "D) None"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q19. (Java)
+public class Test {
+ public static void main(String[] args) {
+   int i = 0;
+   while(i < 3)
+     System.out.println(i);
+     i++;
+ }
+}`,
+    options: [
+      "A) 0 1 2",
+      "B) Infinite loop printing 0",
+      "C) Syntax error",
+      "D) None"
+    ],
+    ans: "B"
+  },
+  {
+    q: `Q20. (Python)
+a = [1, 2, 3]
+b = a
+a = a + [4]
+print(b)`,
+    options: [
+      "A) [1, 2, 3, 4]",
+      "B) [1, 2, 3]",
+      "C) [4]",
+      "D) Error"
+    ],
+    ans: "B"
+  }
+];
+
+
+    let current = 0, score = 0, selectedAnswer = null, timer, timeLeft = 90;
+
+    function startTimer() {
+      timeLeft = 90;
+      document.getElementById("timer").textContent = `⏱ Time Left: ${timeLeft}s`;
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = `⏱ Time Left: ${timeLeft}s`;
+        if (timeLeft <= 0) { clearInterval(timer); submitAnswer(); }
+      }, 1000);
+    }
+
+    function showQuestion() {
+      if (current < questions.length) {
+        selectedAnswer = null;
+        const q = questions[current];
+        document.getElementById("question").innerText = q.q;
+        const optionsDiv = document.getElementById("options");
+        optionsDiv.innerHTML = "";
+        q.options.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.className = "btn";
+          btn.innerText = opt;  // full option text
+          btn.onclick = () => {
+            selectedAnswer = opt.charAt(0); // store A/B/C/D
+            Array.from(optionsDiv.children).forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+          };
+          optionsDiv.appendChild(btn);
+        });
+        startTimer();
+      } else { submitQuiz(); }
+    }
+
+    function submitAnswer() {
+      clearInterval(timer);
+      if (selectedAnswer === questions[current]?.ans) score++;
+      current++;
+      showQuestion();
+    }
+
+    function submitQuiz() {
+      const teamName = localStorage.getItem("teamName") || "Anonymous";
+      const round = 2;
+      const timestamp = Date.now();
+
+      db.ref("leaderboard2").push({
+        name: teamName,
+        score: score,
+        round: round,
+        timestamp: timestamp
+      }).then(() => {
+        localStorage.setItem("round2Score", score);
+        alert(`✅ Round 2 complete! Your score: ${score}/${questions.length}`);
+        window.location.href = "waiting3.html";
+      }).catch(err => console.error("Error saving score:", err));
+    }
+
+    showQuestion();
+
+    // ===== TAB SWITCH DETECTION LOGIC =====
+    let switchCount = 0;
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) {
+        switchCount++;
+        if (switchCount === 1) {
+          alert("⚠ Warning! You switched tabs. Do not leave the quiz window again!");
+        } else if (switchCount === 2) {
+          alert("🚨 Second Warning! If you switch again, you will be disqualified!");
+        } else if (switchCount >= 3) {
+          alert("❌ You are disqualified for switching tabs multiple times.");
+          localStorage.removeItem("teamName");
+          localStorage.removeItem("quizScore");
+          window.location.href = "disqualified.html";
+        }
+      }
+    });
+  </script>
+</body
